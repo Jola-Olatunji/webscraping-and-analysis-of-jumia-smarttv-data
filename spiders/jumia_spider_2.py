@@ -21,10 +21,15 @@ class JumiaSpider2(scrapy.Spider):
         # extract all the product links on current page
         link_path = '//*[@id="jm"]/main/div[2]/div[3]/section/div[1]//@href'
         links = response.xpath(link_path).extract()
+        
 
         # follow the lnks to the next parser
         for url in links:
-            yield response.follow(url = url, callback = self.parse_page, meta={'dont_merge_cookies': True,'dont_filter' : True})
+
+
+
+            yield response.follow(url = url, callback = self.parse_page,
+                                  meta={'dont_merge_cookies': True,'dont_filter' : True})
 
         next_page_href = response.xpath('//div[@class="pg-w -ptm -pbxl"]/a[6]/@href')
         next_page_url = response.urljoin(next_page_href.extract_first())
@@ -32,7 +37,8 @@ class JumiaSpider2(scrapy.Spider):
 
         
         if next_page_href is not None:
-            yield Request(next_page_url, callback = self.parse2, meta={'dont_merge_cookies': True, 'dont_filter' : True} )
+            yield Request(next_page_url, callback = self.parse2, meta={'dont_merge_cookies': True, 
+                                                                       'dont_filter' : True} )
     
     def parse_page(self, response):
 
@@ -44,13 +50,13 @@ class JumiaSpider2(scrapy.Spider):
             'ratings' : response.xpath('//div[@class = "stars _s _al"]/text()').extract_first(),
             'specification' : response.xpath('//div[@class = "card-b -fh"]/div/ul//li/text()').extract(),
             'Seller_name' : response.xpath('//div[@class = "-hr -pas"]/p/text()').extract_first(),
-            'seller_rating' : response.xpath('//div[@class = "-hr -pas"]/div/div/p/bdo/text()').extract_first()
-
+            'seller_rating' : response.xpath('//div[@class = "-hr -pas"]/div/div/p/bdo/text()').extract_first(),
+            'url': response.url
         }
     
 process = CrawlerProcess(settings ={
     "FEEDS": {
-        "jumia_tv_catalogue.json":{"format" : "json"}
+        "jumia_tv_catalogues.json":{"format" : "json"}
     }
 })
 
